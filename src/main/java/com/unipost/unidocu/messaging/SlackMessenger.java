@@ -59,8 +59,6 @@ public class SlackMessenger implements PlatformMessenger {
     }
 
     public void sendCardMessage() {
-        //채널 ID, U077F7WN5V5: 김재현
-
         /*SectionBlock headerBlock = Blocks.section(s -> s.text(MarkdownTextObject.builder()
                 .text("문자열")
                 .build()));
@@ -76,7 +74,7 @@ public class SlackMessenger implements PlatformMessenger {
 
         try {
             ChatPostMessageRequest request = ChatPostMessageRequest.builder()
-                    .channel("U077F7WN5V5")
+                    .channel("")
                     .blocks(Arrays.asList())
                     .build();
 
