@@ -3,6 +3,8 @@ package com.unipost.unidocu.messaging;
 import com.slack.api.Slack;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
+import com.slack.api.methods.request.conversations.ConversationsListRequest;
+import com.slack.api.methods.response.conversations.ConversationsListResponse;
 import com.slack.api.methods.response.users.UsersListResponse;
 import com.slack.api.model.User;
 import com.slack.api.model.block.*;
@@ -39,6 +41,36 @@ public class SlackMessenger implements PlatformMessenger {
     @Override
     public void test() {
         //ApiTestResponse response = slack
+    }
+
+    @Override
+    public void getChannels() {
+        String nextCursor = null;
+        try {
+            do {
+                ConversationsListResponse response = slack.methods(token).conversationsList(
+                        ConversationsListRequest.builder()
+                                .limit(200)
+                                .cursor(nextCursor)
+                                .build()
+                );
+
+                if (response.isOk()) {
+                    // 채널 ID 및 이름 출력
+                    response.getChannels().forEach(channel -> {
+                        System.out.println("Channel ID: " + channel.getId() + ", Name: " + channel.getName());
+                    });
+
+                    nextCursor = response.getResponseMetadata().getNextCursor(); // 다음 페이지 처리
+                } else {
+                    System.err.println("Error: " + response.getError());
+                    break;
+                }
+            } while (nextCursor != null && !nextCursor.isEmpty());
+
+        } catch(SlackApiException | IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     @Override
