@@ -1,8 +1,8 @@
 package com.unipost.unidocu.messaging;
 
 public interface PlatformMessenger {
-    public void sendMessage(String message);
+    public void sendMessage(Target target);
     public void getChannels();
-    public void test();
     public void getMembers();
+    public void sendCardMessage(Target target);
 }
