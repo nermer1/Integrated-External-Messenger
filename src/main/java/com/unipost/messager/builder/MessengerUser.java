@@ -1,4 +1,4 @@
-package com.unipost.unidocu.messaging;
+package com.unipost.messager.builder;
 
 public class MessengerUser {
     private final String username;

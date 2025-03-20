@@ -1,4 +1,4 @@
-package com.unipost.unidocu.messaging;
+package com.unipost.messager.type;
 
 public enum PlatformMessengerType {
     SLACK

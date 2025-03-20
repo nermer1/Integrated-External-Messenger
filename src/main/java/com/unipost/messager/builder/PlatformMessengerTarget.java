@@ -1,12 +1,13 @@
-package com.unipost.unidocu.messaging;
+package com.unipost.messager.builder;
 
-public class Target {
-    private String teamId;
-    private String channelId;
-    private String chatId;
-    private Object message;
+public class PlatformMessengerTarget {
+    public String teamId;
+    public String channelId;
+    public String chatId;
+    public String email;
+    public Object message;
 
-    public Target() {
+    public PlatformMessengerTarget() {
 
     }
 
@@ -41,4 +42,8 @@ public class Target {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public String getEmail() { return email; }
+
+    public void setEmail(String email) { this.email = email; }
 }
