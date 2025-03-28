@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slack.api.Slack;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
+import com.slack.api.methods.response.chat.ChatPostMessageResponse;
 import com.slack.api.methods.response.users.UsersLookupByEmailResponse;
 import com.unipost.messager.builder.PlatformMessengerTarget;
 import com.unipost.messager.exception.SlackIntegrationException;
@@ -17,12 +18,17 @@ public class SlackMessenger implements PlatformMessenger {
     private final String token;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // blocks kit 관련 https://api.slack.com/tools/block-kit-builder
-
     public SlackMessenger(String token) {
         this.token = token;
     }
 
+    /**
+     * channelId 또는 email로 유저 ID 조회
+     * channelId가 우선순위가 높음
+     *
+     * @param platformMessengerTarget 메시지 내용, 채널, 수신자 등의 정보를 포함한 객체
+     * @return 유저 ID
+     */
     public String getId(PlatformMessengerTarget platformMessengerTarget) {
         String email = platformMessengerTarget.getEmail();
         String channelId = platformMessengerTarget.getChannelId();
@@ -32,20 +38,34 @@ public class SlackMessenger implements PlatformMessenger {
         else return this.getIdByEmail(email);
     }
 
+    /**
+     * 메시지 전송
+     * 문자열 형식의 메시지 전송
+     *
+     * @param platformMessengerTarget 메시지 내용, 채널, 수신자 등의 정보를 포함한 객체
+     */
     @Override
     public void sendMessage(PlatformMessengerTarget platformMessengerTarget) {
         try {
             Object message = platformMessengerTarget.getMessage();
             if(!(message instanceof String)) throw new IllegalArgumentException("Invalid message type");
-            slack.methods(token).chatPostMessage(ChatPostMessageRequest.builder()
+            ChatPostMessageResponse response = slack.methods(token).chatPostMessage(ChatPostMessageRequest.builder()
                     .channel(this.getId(platformMessengerTarget))
                     .text((String) message)
                     .build());
+
+            if(!response.isOk()) throw new SlackIntegrationException(response.getError());
         } catch(SlackApiException | IOException e) {
             throw new SlackIntegrationException(e.getMessage());
         }
     }
 
+    /**
+     * 메시지 전송
+     * blocks kit 형식의 카드 메시지 전송
+     *
+     * @param platformMessengerTarget 메시지 내용, 채널, 수신자 등의 정보를 포함한 객체
+     */
     @Override
     public void sendCardMessage(PlatformMessengerTarget platformMessengerTarget) {
         try {
@@ -60,20 +80,29 @@ public class SlackMessenger implements PlatformMessenger {
                 throw new IllegalArgumentException("Invalid message type");
             }
 
-            slack.methods(token).chatPostMessage(
+            ChatPostMessageResponse response = slack.methods(token).chatPostMessage(
                     ChatPostMessageRequest.builder()
                             .channel(this.getId(platformMessengerTarget))
                             .blocksAsString(blocksJson)
                             .build()
             );
+
+            if(!response.isOk()) throw new SlackIntegrationException(response.getError());
         } catch(IOException | SlackApiException e) {
             throw new SlackIntegrationException(e.getMessage());
         }
     }
 
+    /**
+     * 이메일로 유저 ID 조회
+     *
+     * @param email 이메일 주소
+     * @return 유저 ID
+     */
     public String getIdByEmail(String email) {
         try {
             UsersLookupByEmailResponse response = slack.methods(token).usersLookupByEmail(r -> r.email(email));
+            if(!response.isOk()) throw new SlackIntegrationException(response.getError());
             return response.getUser().getId();
         } catch(SlackApiException | IOException e) {
             throw new SlackIntegrationException(e.getMessage());

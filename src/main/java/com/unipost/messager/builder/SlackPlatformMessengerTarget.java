@@ -2,6 +2,15 @@ package com.unipost.messager.builder;
 
 public class SlackPlatformMessengerTarget extends PlatformMessengerTarget {
 
+    /**
+     * 슬랙 메시지 전송을 위한 대상 정보
+     *
+     * channelId 채널 아이디(채널 또는 유저)
+     * message 전송할 메시지
+     * email 이메일
+     *
+     *
+     */
     public SlackPlatformMessengerTarget(Builder builder) {
         this.channelId = builder.channelId;
         this.message = builder.message;
